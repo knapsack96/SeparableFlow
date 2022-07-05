@@ -267,7 +267,10 @@ def main_worker(gpu, ngpus_per_node, argss):
         model = torch.nn.parallel.DistributedDataParallel(model.cuda(), device_ids=[gpu])
     else:
         model = torch.nn.DataParallel(model).cuda()
-
+    for name, param in model.named_parameters():
+        if param.requires_grad:# and name != "module.update_block.mask.2.weight":
+            print(name, param)
+        #param.requires_grad = False
     #scheduler = None
     logger = Logger(model, scheduler)
 
