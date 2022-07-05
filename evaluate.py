@@ -112,9 +112,9 @@ def validate_sintel(model, iters=32):
     model.eval()
     results = {}
     for dstype in ['clean', 'final']:
-        val_dataset = datasets.MpiSintel(split='training', dstype=dstype)
+        val_dataset = datasets.MpiSintel(split='validation', dstype=dstype)
         epe_list = []
-
+        acc = 0
         for val_id in range(len(val_dataset)):
             image1, image2, flow_gt, _ = val_dataset[val_id]
             image1 = image1[None].cuda()
@@ -128,7 +128,9 @@ def validate_sintel(model, iters=32):
 
             epe = torch.sum((flow - flow_gt)**2, dim=0).sqrt()
             epe_list.append(epe.view(-1).numpy())
-
+            acc += np.mean(epe.view(-1).numpy())
+            print(val_id)
+        print(acc/len(val_dataset)
         epe_all = np.concatenate(epe_list)
         epe = np.mean(epe_all)
         px1 = np.mean(epe_all<1)
@@ -235,7 +237,8 @@ if __name__ == '__main__':
 
     model.cuda()
     model.eval()
-
+    validate_sintel(model.module)
+    quit()
     with torch.no_grad():
         if args.dataset == 'sintel':
             create_sintel_submission(model.module)
