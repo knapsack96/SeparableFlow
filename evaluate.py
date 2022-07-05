@@ -130,7 +130,7 @@ def validate_sintel(model, iters=32):
             epe_list.append(epe.view(-1).numpy())
             acc += np.mean(epe.view(-1).numpy())
             print(val_id)
-        print(acc/len(val_dataset)
+        print(acc/len(val_dataset))
         epe_all = np.concatenate(epe_list)
         epe = np.mean(epe_all)
         px1 = np.mean(epe_all<1)
