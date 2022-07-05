@@ -300,17 +300,17 @@ def main_worker(gpu, ngpus_per_node, argss):
                 print("=> no checkpoint found at '{}'".format(args.resume))
 
     train_set = datasets.fetch_dataloader(args)
-    val_set = datasets.KITTI(split='training')
-    val_set3 = datasets.FlyingChairs(split='validation')
-    val_set2_2 = datasets.MpiSintel(split='training', dstype='final')
-    val_set2_1 = datasets.MpiSintel(split='training', dstype='clean')
+    #val_set = datasets.KITTI(split='training')
+    #val_set3 = datasets.FlyingChairs(split='validation')
+    #val_set2_2 = datasets.MpiSintel(split='training', dstype='final')
+    #val_set2_1 = datasets.MpiSintel(split='training', dstype='clean')
     sys.stdout.flush()
     if args.distributed:
         train_sampler = torch.utils.data.distributed.DistributedSampler(train_set)
-        val_sampler = torch.utils.data.distributed.DistributedSampler(val_set)
-        val_sampler2_2 = torch.utils.data.distributed.DistributedSampler(val_set2_2)
-        val_sampler2_1 = torch.utils.data.distributed.DistributedSampler(val_set2_1)
-        val_sampler3 = torch.utils.data.distributed.DistributedSampler(val_set3)
+        #val_sampler = torch.utils.data.distributed.DistributedSampler(val_set)
+        #val_sampler2_2 = torch.utils.data.distributed.DistributedSampler(val_set2_2)
+        #val_sampler2_1 = torch.utils.data.distributed.DistributedSampler(val_set2_1)
+        #val_sampler3 = torch.utils.data.distributed.DistributedSampler(val_set3)
     else:
         train_sampler = None
         val_sampler = None
@@ -318,10 +318,10 @@ def main_worker(gpu, ngpus_per_node, argss):
         val_sampler2_2 = None
         val_sampler3 = None
     training_data_loader = torch.utils.data.DataLoader(train_set, batch_size=args.batchSize, shuffle=(train_sampler is None), num_workers=args.workers, pin_memory=True, sampler=train_sampler, drop_last=True)
-    val_data_loader = torch.utils.data.DataLoader(val_set, batch_size=args.testBatchSize, shuffle=False, num_workers=args.workers//2, pin_memory=True, sampler=val_sampler)
-    val_data_loader2_2 = torch.utils.data.DataLoader(val_set2_2, batch_size=args.testBatchSize, shuffle=False, num_workers=args.workers//2, pin_memory=True, sampler=val_sampler2_2)
-    val_data_loader2_1 = torch.utils.data.DataLoader(val_set2_1, batch_size=args.testBatchSize, shuffle=False, num_workers=args.workers//2, pin_memory=True, sampler=val_sampler2_1)
-    val_data_loader3 = torch.utils.data.DataLoader(val_set3, batch_size=args.testBatchSize, shuffle=False, num_workers=args.workers//2, pin_memory=True, sampler=val_sampler3)
+    #val_data_loader = torch.utils.data.DataLoader(val_set, batch_size=args.testBatchSize, shuffle=False, num_workers=args.workers//2, pin_memory=True, sampler=val_sampler)
+    #val_data_loader2_2 = torch.utils.data.DataLoader(val_set2_2, batch_size=args.testBatchSize, shuffle=False, num_workers=args.workers//2, pin_memory=True, sampler=val_sampler2_2)
+    #val_data_loader2_1 = torch.utils.data.DataLoader(val_set2_1, batch_size=args.testBatchSize, shuffle=False, num_workers=args.workers//2, pin_memory=True, sampler=val_sampler2_1)
+    #val_data_loader3 = torch.utils.data.DataLoader(val_set3, batch_size=args.testBatchSize, shuffle=False, num_workers=args.workers//2, pin_memory=True, sampler=val_sampler3)
 
     error = 100
     args.nEpochs = args.num_steps // len(training_data_loader) + 1
@@ -341,10 +341,10 @@ def main_worker(gpu, ngpus_per_node, argss):
         
         if args.stage == 'chairs':
             loss = val(val_data_loader3, model, split='chairs')
-        elif args.stage == 'sintel' or args.stage == 'things':
-            loss_tmp = val(val_data_loader2_1, model, split='sintel', iters=32)
-            loss_tmp = val(val_data_loader2_2, model, split='sintel', iters=32)
-            loss_tmp = val(val_data_loader, model, split='kitti')
+        #elif args.stage == 'sintel' or args.stage == 'things':
+            #loss_tmp = val(val_data_loader2_1, model, split='sintel', iters=32)
+            #loss_tmp = val(val_data_loader2_2, model, split='sintel', iters=32)
+            #loss_tmp = val(val_data_loader, model, split='kitti')
         elif args.stage == 'kitti':
             loss_tmp = val(val_data_loader, model, split='kitti')
 
@@ -395,15 +395,15 @@ def train(training_data_loader, model, optimizer, scheduler, logger, epoch):
             if main_process():
                 logger.push(metrics)
          #       print(metrics)
-                if valid_iteration % 10000 == 0: 
-                    save_checkpoint(args.save_path, epoch,{
-                            'epoch': epoch,
-                            'state_dict': model.state_dict(),
-                            'optimizer' : optimizer.state_dict(),
-                            'scheduler' : scheduler.state_dict(),
-                        }, False)
+                 
+    save_checkpoint(args.save_path, epoch,{
+            'epoch': epoch,
+            'state_dict': model.state_dict(),
+            'optimizer' : optimizer.state_dict(),
+            'scheduler' : scheduler.state_dict(),
+        }, False)
 
-            sys.stdout.flush()
+    #sys.stdout.flush()
 
 def val(testing_data_loader, model, split='sintel', iters=24):
     epoch_error = 0
